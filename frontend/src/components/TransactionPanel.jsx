@@ -5,172 +5,326 @@ import { motion } from "framer-motion";
 export default function TransactionsPanel({ transactions, loading, onReload }) {
   const rowVariants = {
     hidden: { opacity: 0, y: 10 },
-    visible: (i) => ({ opacity: 1, y: 0, transition: { delay: i * 0.03 } }),
+    visible: (i) => ({
+      opacity: 1,
+      y: 0,
+      transition: { delay: i * 0.04, duration: 0.3 },
+    }),
   };
 
   const buttonVariants = {
-    hover: { scale: 1.05 },
+    hover: { scale: 1.06, boxShadow: "0 8px 20px rgba(230,57,70,0.35)" },
     tap: { scale: 0.95 },
+  };
+
+  const panelStyle = {
+    width: "100%",
+    maxWidth: 850,
+    borderRadius: 24,
+    background: "linear-gradient(145deg, #ffffff 0%, #f8f9fb 100%)",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.07)",
+    position: "relative",
+    overflow: "hidden",
+    top: -30,
   };
 
   return (
     <motion.div
-      className="card border-0 shadow-lg p-4 position-relative overflow-hidden panel"
-      style={{
-        padding: 24,
-        borderRadius: 18,
-        background: "linear-gradient(145deg, #ffffff 0%, #f8f9fb 100%)",
-        color: "#1a1a1a",
-        boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
-        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-        width: 850,
-        backdropFilter: "blur(6px)",
-      }}
+      className="p-4 p-md-5"
+      style={panelStyle}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
+      transition={{ duration: 0.5 }}
     >
-      {/* Header Section */}
+      {/* Top Accent Border */}
       <div
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          borderBottom: "2px solid rgba(0,0,0,0.05)",
-          paddingBottom: 12,
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 4,
+        
         }}
-      >
-        <div>
+      />
+
+      {/* Header */}
+      <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-light">
+        <div className="d-flex align-items-center gap-3">
           <div
-            className="fw-bold text-danger"
             style={{
-              fontSize: 20,
-              color: "linear-gradient(135deg, #ff6b81 0%, #e63946 100%)",
+              width: 56,
+              height: 56,
+              borderRadius: 16,
+              background: "linear-gradient(135deg, #ff4d6d, #e63946)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#fff",
+              fontSize: 24,
+              boxShadow: "0 6px 14px rgba(230,57,70,0.3)",
             }}
           >
-            Transactions
+            <i className="bi bi-clock-history"></i>
           </div>
-          <div style={{ fontSize: 14, color: "#666" }}>Complete transaction history</div>
+          <div>
+            <h4
+              className="fw-bold mb-1"
+              style={{
+                background: "linear-gradient(135deg, #ff4d6d, #e63946)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              Transaction History
+            </h4>
+            <p className="text-muted small mb-0">
+              <i className="bi bi-activity me-1"></i>
+              View your transaction records
+            </p>
+          </div>
         </div>
 
         <motion.button
-          className="primary"
+          className="btn fw-bold text-white border-0 px-4 py-2"
           onClick={onReload}
           style={{
-            padding: "8px 18px",
-            fontWeight: 600,
-            fontSize: 14,
-            borderRadius: 8,
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-            transition: "transform 0.2s ease",
+            borderRadius: 12,
+            fontSize: "0.9rem",
+            background: "linear-gradient(135deg, #ff4d6d, #e63946)",
+            boxShadow: "0 4px 12px rgba(230,57,70,0.3)",
           }}
           variants={buttonVariants}
           whileHover="hover"
           whileTap="tap"
         >
+          <i className="bi bi-arrow-clockwise me-2"></i>
           Reload
         </motion.button>
       </div>
 
-      {/* Table Section */}
-      <div style={{ marginTop: 20 }}>
-        {loading ? (
+      {/* Main Table */}
+      {loading ? (
+        <div className="text-center py-5">
           <LoadingInline text="Loading transactions..." />
-        ) : transactions && transactions.length ? (
-          <div
+        </div>
+      ) : transactions && transactions.length ? (
+        <div
+          style={{
+            maxHeight: 550,
+            overflowY: "auto",
+            borderRadius: 16,
+            border: "1px solid rgba(230,57,70,0.1)",
+            background: "#fff",
+            boxShadow: "inset 0 2px 6px rgba(0,0,0,0.03)",
+          }}
+        >
+          <table
             style={{
-              maxHeight: 520,
-              overflowY: "auto",
-              borderRadius: 12,
-              background: "#ffffff",
-              boxShadow: "inset 0 0 8px rgba(0,0,0,0.05)",
+              width: "100%",
+              borderCollapse: "collapse",
             }}
           >
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                color: "#1a1a1a",
-                borderRadius: 12,
-                overflow: "hidden",
-              }}
-            >
-              <thead
+            <thead>
+              <tr
                 style={{
-                  position: "sticky",
-                  top: 0,
-                  background: "linear-gradient(135deg, #ff6b81 0%, #e63946 100%)",
+                  background: "linear-gradient(135deg, #ff4d6d, #e63946)",
                   color: "#fff",
-                  zIndex: 1,
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  fontSize: "0.85rem",
+                  textTransform: "uppercase",
                 }}
               >
-                <tr>
-                  {["Timestamp", "From", "To", "Amount", "Foreign"].map((h) => (
-                    <th
-                      key={h}
+                {[
+                  { label: "Timestamp", icon: "bi-clock-fill" },
+                  { label: "From", icon: "bi-person-fill" },
+                  { label: "To", icon: "bi-person-plus-fill" },
+                  { label: "Amount", icon: "bi-currency-rupee" },
+                  { label: "Type", icon: "bi-globe" },
+                ].map((h) => (
+                  <th
+                    key={h.label}
+                    style={{
+                      padding: "14px 16px",
+                      fontWeight: 600,
+                      textAlign: "left",
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 5,
+                      letterSpacing: "0.4px",
+                    }}
+                  >
+                    <i className={`bi ${h.icon} me-1`}></i>
+                    {h.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {transactions.map((t, i) => (
+                <motion.tr
+                  key={i}
+                  variants={rowVariants}
+                  custom={i}
+                  initial="hidden"
+                  animate="visible"
+                  whileHover={{
+                    background: "rgba(255,77,109,0.05)",
+                    transition: { duration: 0.2 },
+                  }}
+                  style={{
+                    borderBottom: "1px solid rgba(0,0,0,0.04)",
+                  }}
+                >
+                  <td style={{ padding: "12px 16px", fontSize: "0.9rem" }}>
+                    <div className="d-flex align-items-center gap-2 text-dark">
+                      <i className="bi bi-calendar3 text-muted"></i>
+                      {t.timestamp ? new Date(t.timestamp).toLocaleString() : "—"}
+                    </div>
+                  </td>
+
+                  <td style={{ padding: "12px 16px" }}>
+                    <div className="d-flex align-items-center gap-2">
+                      <span
+                        style={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: 8,
+                          background: "linear-gradient(135deg, #ff4d6d, #e63946)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "#fff",
+                          fontSize: 12,
+                          fontWeight: 700,
+                        }}
+                      >
+                        {String(t.senderAccount || t.from || "—")[0]}
+                      </span>
+                      <span className="text-muted">
+                        {t.senderAccount || t.from || "—"}
+                      </span>
+                    </div>
+                  </td>
+
+                  <td style={{ padding: "12px 16px" }}>
+                    <div className="d-flex align-items-center gap-2">
+                      <span
+                        style={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: 8,
+                          background: "linear-gradient(135deg, #10b981, #059669)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "#fff",
+                          fontSize: 12,
+                          fontWeight: 700,
+                        }}
+                      >
+                        {String(t.receiverAccount || t.to || "—")[0]}
+                      </span>
+                      <span className="text-muted">
+                        {t.receiverAccount || t.to || "—"}
+                      </span>
+                    </div>
+                  </td>
+
+                  <td style={{ padding: "12px 16px", fontWeight: 600 }}>
+                    <span
                       style={{
-                        padding: "14px 12px",
-                        fontWeight: 700,
-                        fontSize: 13,
-                        textTransform: "uppercase",
-                        textAlign: "left",
-                        letterSpacing: "0.5px",
-                        borderBottom: "1px solid rgba(255,255,255,0.2)",
+                        color: "#28a745",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
                       }}
                     >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-
-              <tbody>
-                {transactions.map((t, i) => (
-                  <motion.tr
-                    key={i}
-                    style={{
-                      background: i % 2 === 0 ? "#fff" : "#f7f9fc",
-                      transition: "all 0.25s ease",
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.background = "rgba(255,107,129,0.1)";
-                      e.currentTarget.style.transform = "scale(1.01)";
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.background = i % 2 === 0 ? "#fff" : "#f7f9fc";
-                      e.currentTarget.style.transform = "scale(1)";
-                    }}
-                    initial="hidden"
-                    animate="visible"
-                    variants={rowVariants}
-                    custom={i}
-                  >
-                    <td style={{ padding: "12px 12px", fontWeight: 400 }}>
-                      {t.timestamp ? new Date(t.timestamp).toLocaleString() : "—"}
-                    </td>
-                    <td style={{ padding: "12px 12px" }}>{t.senderAccount || t.from || "—"}</td>
-                    <td style={{ padding: "12px 12px" }}>{t.receiverAccount || t.to || "—"}</td>
-                    <td style={{ padding: "12px 12px", fontWeight: 600, color: "#e63946" }}>
+                      <i className="bi bi-currency-rupee"></i>
                       {typeof t.amount === "number"
-                        ? t.amount.toLocaleString("en-IN", { style: "currency", currency: "INR" })
+                        ? t.amount.toLocaleString("en-IN", {
+                            maximumFractionDigits: 2,
+                          })
                         : t.amount}
-                    </td>
-                    
-                    <td style={{ padding: "12px 12px", fontWeight: 500 }}>
-                      {t.isForeign ? "🌍 Yes" : "🇮🇳 No"}
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
+                    </span>
+                  </td>
+
+                  <td style={{ padding: "12px 16px" }}>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                        padding: "6px 12px",
+                        borderRadius: 20,
+                        fontSize: "0.8rem",
+                        fontWeight: 600,
+                        background: t.isForeign
+                          ? "rgba(59,130,246,0.1)"
+                          : "rgba(16,185,129,0.1)",
+                        color: t.isForeign ? "#3b82f6" : "#10b981",
+                      }}
+                    >
+                      <i className={`bi ${t.isForeign ? "bi-globe" : "bi-house-fill"}`}></i>
+                      {t.isForeign ? "Foreign" : "Domestic"}
+                    </span>
+                  </td>
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <motion.div
+          className="text-center py-5"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          style={{
+            borderRadius: 16,
+            background: "#f8f9fa",
+            border: "2px dashed rgba(230,57,70,0.2)",
+          }}
+        >
+          <div
+            style={{
+              width: 80,
+              height: 80,
+              margin: "0 auto 1.5rem",
+              borderRadius: "50%",
+              background: "rgba(230,57,70,0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 36,
+              color: "#e63946",
+            }}
+          >
+            <i className="bi bi-inbox"></i>
           </div>
-        ) : (
-          <div style={{ color: "#666", marginTop: 12, textAlign: "center", fontStyle: "italic" }}>
-            No transactions found.
+          <h5 className="fw-bold text-muted mb-2">No Transactions Found</h5>
+          <p className="text-muted mb-0" style={{ fontSize: "0.9rem" }}>
+            Your transaction history will appear here
+          </p>
+        </motion.div>
+      )}
+
+      {/* Footer Summary */}
+      {transactions && transactions.length > 0 && (
+        <motion.div
+          className="mt-4 pt-3 border-top border-light text-muted small"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: { delay: 0.3 } }}
+        >
+          <div className="d-flex align-items-center gap-3">
+            <i className="bi bi-info-circle-fill text-danger"></i>
+            <span>
+              Total Records: <strong>{transactions.length}</strong>
+            </span>
+            <span className="mx-2">•</span>
+            <i className="bi bi-shield-check-fill text-success"></i>
+            <span>All transactions verified</span>
           </div>
-        )}
-      </div>
+        </motion.div>
+      )}
     </motion.div>
   );
 }

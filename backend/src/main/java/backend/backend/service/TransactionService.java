@@ -3,6 +3,7 @@ package backend.backend.service;
 import backend.backend.model.Transaction;
 import backend.backend.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.*;
@@ -12,6 +13,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class TransactionService {
+    @Value("${fraud.ml.url}")
+    private String mlUrl;
+
 
     private final TransactionRepository transactionRepository;
     private final RestTemplate restTemplate;
@@ -28,7 +32,7 @@ public class TransactionService {
 
     // Send to ML model and get fraud prediction
     public List<Transaction> checkFraud(List<Transaction> transactions) {
-        String mlUrl = "http://fraud-ml:8001/predict"; //  FastAPI endpoint
+
 
         Map<String, Object> body = new HashMap<>();
         body.put("transactions", transactions);

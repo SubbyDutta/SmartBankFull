@@ -6,12 +6,13 @@ services:
     container_name: fraud-db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: subham
-      MYSQL_DATABASE: fraud_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3308:3306"
-    volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+  
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -24,13 +25,16 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_APPLICATION_NAME: backend
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/fraud_db?useSSL=false&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: subham
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_JPA_SHOW_SQL: "true"
-      JWT_SECRET: secrgrljnglwnrb84963634jbajkegbsl4rbkjgbrrrrrrdrrxrtdrrrrrrrrrrr
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+      SPRING_JPA_SHOW_SQL: ${SPRING_JPA_SHOW_SQL}
+      JWT_SECRET: ${JWT_SECRET}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_SECRET: ${RAZORPAY_SECRET}
+      FRAUD_ML_URL: ${FRAUD_ML_URL}
+      LOAN_CHECK_URL: ${LOAN_CHECK_URL}
     depends_on:
       db:
         condition: service_healthy
@@ -39,25 +43,27 @@ services:
     build: ./fraud-ml
     container_name: fraud-ml
     ports:
-      - "8001:8000"
+      - "8001:8001"
+   
     depends_on:
       - backend
-    command: uvicorn app:app --host 0.0.0.0 --port 8001
 
   loan-check:
     build: ./loan-check
     container_name: loan-ml
     ports:
       - "8000:8000"
+   
     depends_on:
       - backend
-    command: uvicorn app:app --host 0.0.0.0 --port 8000
 
   frontend:
     build: ./frontend
     container_name: fraud-frontend
     ports:
       - "3000:80"
+    environment:
+      REACT_APP_API_URL: ${REACT_APP_API_URL}
     depends_on:
       - backend
       - fraud-ml

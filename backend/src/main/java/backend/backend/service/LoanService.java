@@ -4,6 +4,7 @@ import backend.backend.model.*;
 import backend.backend.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -25,8 +26,10 @@ public class LoanService {
     @Autowired private TransactionRepository txRepo;
     @Autowired private LoanRepaymentRepository repaymentRepository;
 
+    @Value("${loan.check.url}")
+    private String loanCheckUrl;
 
-    private final String mlServiceUrl = "http://loan-check:8000/predictloan";
+
 
     // Check loan eligibility using ML
     public LoanEligibilityRequest checkEligibility(String username, double income, String pan, String adhar, double creditScore, double requestedAmount) {
@@ -64,7 +67,7 @@ public class LoanService {
                 "avg_transaction", avgAmount
         );
 
-        Map<String, Object> response = restTemplate.postForObject(mlServiceUrl, payload, Map.class);
+        Map<String, Object> response = restTemplate.postForObject(loanCheckUrl, payload, Map.class);
         req.setEligible((Boolean) response.get("eligible"));
         req.setProbability(((Number) response.get("probability")).doubleValue());
 
@@ -221,7 +224,7 @@ public class LoanService {
         } else {
             repaymentRepo.save(repayment);
         }
-     return  repayment;
+        return  repayment;
     }
 
 
