@@ -1,73 +1,77 @@
 version: "3.9"
 
 services:
-  db:
-    image: mysql:8.0
-    container_name: fraud-db
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    ports:
-      - "3308:3306"
   
+  redis:
+    image: redis:7-alpine
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   backend:
     build: ./backend
-    container_name: fraud-backend
+    container_name: banking-backend
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
-      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
-      SPRING_JPA_SHOW_SQL: ${SPRING_JPA_SHOW_SQL}
-      JWT_SECRET: ${JWT_SECRET}
-      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
-      RAZORPAY_SECRET: ${RAZORPAY_SECRET}
-      FRAUD_ML_URL: ${FRAUD_ML_URL}
-      LOAN_CHECK_URL: ${LOAN_CHECK_URL}
-    depends_on:
-      db:
-        condition: service_healthy
+      SPRING_PROFILES_ACTIVE: prod
+      
+      
 
-  fraud-ml:
+      DATABASE_URL: jdbc:postgresql://dpg-d51umkffte5s73adm74g-a.oregon-postgres.render.com:5432/smartbankdb_pdg3
+      POSTGRES_USER: smartbankdb_pdg3_user
+      POSTGRES_PASSWORD: SUa8S1SMRluKYGYENG75vAhBp0NZOyqg
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+     
+     
+
+      FRAUD_ML_URL: http://fraud-service:8001/predict
+      LOAN_CHECK_URL: http://loan-service:8000/predictloan
+      FRONTEND_URL: http://localhost:3000/
+
+      RAZORPAY_KEY_ID: rzp_test_RVPxvjAjcRvhXL
+      RAZORPAY_SECRET: QKwbfAzto7W4s4P4nZz4UkFi
+
+      JWT_SECRET: x9f9b2k9D5L7G7A0KJm2c4N7P0c3V1oZqY8+u4T0KpA=
+
+    depends_on:
+      redis:
+        condition: service_healthy
+      fraud-service:
+        condition: service_started
+      loan-service:
+        condition: service_started
+
+    restart: unless-stopped
+
+ 
+
+  fraud-service:
     build: ./fraud-ml
-    container_name: fraud-ml
+    container_name: fraud-service
     ports:
       - "8001:8001"
-   
-    depends_on:
-      - backend
+    restart: unless-stopped
 
-  loan-check:
+  loan-service:
     build: ./loan-check
-    container_name: loan-ml
+    container_name: loan-service
     ports:
       - "8000:8000"
-   
-    depends_on:
-      - backend
+    restart: unless-stopped
 
   frontend:
     build: ./frontend
-    container_name: fraud-frontend
+    container_name: react-frontend
     ports:
       - "3000:80"
-    environment:
-      REACT_APP_API_URL: ${REACT_APP_API_URL}
     depends_on:
       - backend
-      - fraud-ml
-      - loan-check
-
-volumes:
-  db_data:
+    restart: unless-stopped

@@ -2,9 +2,12 @@ package backend.backend.controller;
 
 import backend.backend.model.LoanApplication;
 import backend.backend.model.LoanRepayment;
+import backend.backend.model.LoanSummaryDTO;
 import backend.backend.repository.LoanApplicationRepository;
 import backend.backend.repository.LoanRepaymentRepository;
 import backend.backend.repository.UserRepository;
+import backend.backend.Dtos.LoanRepaymentResponseDto;
+import backend.backend.requests_response.PagedResponse;
 import backend.backend.security.CustomUserDetails;
 import backend.backend.service.LoanService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,22 +31,29 @@ public class LoanRepayController {
     private LoanApplicationRepository loanApplicationRepository;
     @Autowired
     LoanRepaymentRepository loanRepaymentRepository;
-    @GetMapping("/user/approved")
-    public List<LoanApplication> getUserApprovedLoans(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        String username = userDetails.getUsername();
-        return loanApplicationRepository.findByUsernameAndStatus(username, "APPROVED");
-    }
-    // Repay loan
-    @PostMapping("/repay/{loanId}")
-    public LoanRepayment repayLoan(@PathVariable Long loanId, @RequestBody Map<String, Object> body) {
-        double amount = Double.parseDouble(body.get("amount").toString());
-        return loanService.repayLoan(loanId, amount);
-    }
 
+//USER REPAY
+    @PostMapping("/repay/{loanId}")
+    public LoanRepayment repayLoan(@PathVariable Long loanId,@RequestHeader("Idempotency-Key") String key,@RequestBody Map<String, Object> body) {
+        double amount = Double.parseDouble(body.get("amount").toString());
+        System.out.println("OKK");
+        return loanService.repayLoan(loanId, amount,key);
+    }
+    //ADMIN GET ALL REPAYMENTS
+    @GetMapping
+    public PagedResponse<LoanRepaymentResponseDto> getAllRepayments(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return loanService.repayList(page,size);
+    }
+//FOR USER
     @GetMapping("/repayments")
+    @PreAuthorize("hasRole('USER')")
     public List<LoanRepayment> getUserRepayments(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return loanRepaymentRepository.findByUsernameOrderByPaymentDateDesc(userDetails.getUsername());
     }
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/repayments")
     public ResponseEntity<List<LoanRepayment>> getAllRepayments(
             @RequestParam(required = false) String username) {
@@ -61,16 +71,18 @@ public class LoanRepayController {
 
         return ResponseEntity.ok(repayments);
     }
-   /* @GetMapping("/admin/repayments")
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<LoanRepayment> getRepayments(@AuthenticationPrincipal CustomUserDetails userDetails)
-    {
 
-        if(userDetails.getUsername().equals("ADMIN123"))
-          return loanRepaymentRepository.findAll();
-        else
-            return loanRepaymentRepository.findByUsernameOrderByPaymentDateDesc(userDetails.getUsername());
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/summary/{loanId}")
+    public LoanSummaryDTO getSummary(@PathVariable Long loanId) {
+        return loanService.getLoanSummary(loanId);
+    }
 
-    }*/
+    @GetMapping("/user/approved")
+    @PreAuthorize("hasRole('USER')")
+    public List<LoanApplication> getUserApprovedLoans(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        String username = userDetails.getUsername();
+        return loanService.getUserApprovedLoans(username,"APPROVED");
+    }
 
 }

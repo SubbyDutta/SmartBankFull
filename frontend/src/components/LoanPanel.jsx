@@ -21,26 +21,23 @@ export default function Loan() {
 
   const handleCheckEligibility = async () => {
     if (!income || !requestedAmount) {
-      setError({ type: "error", text: "Please fill all fields." });
+      setError("Please fill all fields.");
       return;
     }
 
     if (Number(requestedAmount) > Number(income) * 2) {
-      setError({ type: "error", text: "Requested amount cannot exceed 2× your monthly income." });
+      setError("Requested amount cannot exceed 2× your monthly income.");
       return;
     }
 
     if (!username) {
-      setError({ type: "error", text: "Please log in first" });
+      setError("Please log in first.");
       return;
     }
 
     setLoading(true);
     setError("");
-    setCreditScore(null);
-    setInterestRate(null);
-    setTotalDue(null);
-    setMonthlyEMI(null);
+    setEligibility(null);
 
     try {
       const res = await API.post("/loan/check", {
@@ -48,430 +45,560 @@ export default function Loan() {
         income,
         requestedAmount,
       });
+
       setEligibility(res.data);
 
-    
       if (res.data.eligible) {
         const scoreRes = await API.get("/user/creditscore", {
           headers: { Authorization: `Bearer ${token}` },
         });
+
         const score = scoreRes.data.creditScore;
         setCreditScore(score);
 
-        
         let rate;
-        if (score >= 750) rate = 10;
-        else if (score >= 700) rate = 15;
+        if (score >= 850) rate = 7;
+        else if (score >= 800) rate = 10;
+        else if (score >= 750) rate = 14;
+        else if (score >= 700) rate = 17;
         else if (score >= 650) rate = 20;
-        else rate = 25;
+        else if (score >= 600) rate = 23;
+        else rate = 28;
 
         setInterestRate(rate);
 
-       
         const principal = Number(requestedAmount);
-        const total = principal + (principal*rate/100);
+        const total = principal + (principal * rate) / 100;
         const emi = total / 6;
 
         setTotalDue(total.toFixed(2));
         setMonthlyEMI(emi.toFixed(2));
       }
     } catch (err) {
-      setError({ type: "error", text: err.response?.data?.message || "Error checking eligibility" });
+      setError(
+        err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          "Error checking eligibility"
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const handleApplyLoan = async () => {
-    if (!eligibility || !eligibility.id) {
-      setError({ type: "error", text: "Please check eligibility first" });
+    if (!eligibility?.id) {
+      setError("Please check eligibility first.");
       return;
     }
 
     setLoading(true);
     setError("");
+
     try {
       const res = await API.post(`/loan/apply/${eligibility.id}`);
       setEligibility(res.data);
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 1800);
     } catch (err) {
-      setError({ type: "error", text: err.response?.data || "Error applying for loan" });
+      setError(
+        err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          "Error applying for loan"
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const fields = [
-    {
-      label: "Monthly Income",
-      value: income,
-      set: setIncome,
-      type: "number",
-      placeholder: "Enter monthly income",
-      icon: "bi-cash-coin",
-      color: "#10b981",
-    },
-    {
-      label: "Requested Loan Amount (₹)",
-      value: requestedAmount,
-      set: setRequestedAmount,
-      type: "number",
-      placeholder: "Enter loan amount",
-      icon: "bi-bank",
-      color: "#f59e0b",
-    },
-  ];
-
-  const panelStyle = {
-    width: "100%",
-    maxWidth: 800,
-    borderRadius: 24,
-    top: -30,
-    background: "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
-    position: "relative",
-    overflow: "hidden",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.08)",
-  };
-
   return (
     <>
-      <motion.div
-        className="card border-0 shadow-lg p-4 p-md-5"
-        style={panelStyle}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+      {/* Page background to match dashboard */}
+      <div
+        className="min-vh-100"
+        style={{
+          background: "#f5f7fb",
+          padding: "24px",
+        }}
       >
-        <div style={{ position: "relative", zIndex: 2 }}>
-          <div className="mb-4 text-center">
-            <div className="d-inline-block mb-3">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="mx-auto"
+          style={{ maxWidth: 1120 }}
+        >
+          {/* Main loan card (center column style) */}
+          <div
+            className="shadow-sm"
+            style={{
+              borderRadius: 28,
+              background: "#ffffff",
+              padding: "28px 32px 32px",
+            }}
+          >
+            {/* Header */}
+            <div className="d-flex flex-column align-items-center mb-4">
               <div
                 style={{
                   width: 64,
                   height: 64,
-                  borderRadius: 16,
-                  background: "linear-gradient(135deg, #ff6b81 0%, #e63946 100%)",
+                  borderRadius: 20,
+                  background:
+                    "linear-gradient(180deg, #ff8b94 0%, #ff5a6a 100%)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   color: "#fff",
                   fontSize: 28,
-                  margin: "0 auto",
-                  boxShadow: "0 8px 20px rgba(230,57,70,0.3)",
+                  marginBottom: 16,
+                  boxShadow: "0 10px 20px rgba(255,90,106,0.3)",
                 }}
               >
-                <i className="bi bi-bank"></i>
+                <i className="bi bi-wallet2" />
               </div>
-            </div>
-            <h4
-              className="fw-bold mb-2"
-              style={{
-                background: "linear-gradient(135deg, #ff6b81 0%, #e63946 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
-              Loan Application
-            </h4>
-            <p className="text-muted small mb-0">
-              <i className="bi bi-shield-check-fill me-1 text-success"></i>
-              Check your eligibility & apply instantly
-            </p>
-          </div>
-
-          <div className="row g-4">
-            {fields.map((field, idx) => (
-              <motion.div
-                className="col-md-6"
-                key={idx}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0, transition: { delay: idx * 0.1 } }}
+              <h3
+                className="fw-semibold mb-1"
+                style={{ fontWeight: 10, letterSpacing: 0.2,color:" #ff5a6a" }}
               >
-                <label className="form-label fw-semibold mb-2" style={{ fontSize: "0.9rem" }}>
-                  <i className={`bi ${field.icon} me-2`} style={{ color: field.color }}></i>
-                  {field.label}
-                </label>
-                <input
-                  type={field.type}
-                  className="form-control"
-                  placeholder={field.placeholder}
-                  value={field.value}
-                  onChange={(e) => field.set(e.target.value)}
-                  style={{
-                    borderColor: "rgba(220,53,69,0.2)",
-                    borderRadius: 12,
-                    padding: "12px 16px",
-                    fontSize: "1rem",
-                    transition: "all 0.2s ease",
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = field.color)}
-                  onBlur={(e) => (e.target.style.borderColor = "rgba(220,53,69,0.2)")}
-                />
-              </motion.div>
-            ))}
-
-            <div className="col-12 mt-2">
-              <div className="d-flex gap-3">
-                <motion.button
-                  onClick={handleCheckEligibility}
-                  className="btn btn-danger px-5 py-2"
-                  disabled={loading}
-                  style={{
-                    fontWeight: 600,
-                    borderRadius: 12,
-                    fontSize: "1rem",
-                    flex: 1,
-                  }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  {loading ? (
-                    <>
-                      <span className="spinner-border spinner-border-sm me-2"></span>
-                      Checking...
-                    </>
-                  ) : (
-                    <>
-                      <i className="bi bi-clipboard-check-fill me-2"></i>
-                      Check Eligibility
-                    </>
-                  )}
-                </motion.button>
-                <motion.button
-                  type="button"
-                  className="btn btn-outline-secondary px-4 py-2"
-                  onClick={() => {
-                    setIncome("");
-                    setRequestedAmount("");
-                    setEligibility(null);
-                    setError("");
-                    setCreditScore(null);
-                    setInterestRate(null);
-                    setTotalDue(null);
-                    setMonthlyEMI(null);
-                  }}
-                  style={{
-                    fontWeight: 600,
-                    borderRadius: 12,
-                  }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <i className="bi bi-x-circle me-2"></i>
-                  Clear
-                </motion.button>
-              </div>
+                Loan Eligibility
+              </h3>
+              <p
+                className="text-muted mb-0"
+                style={{ fontSize: 14, maxWidth: 420, textAlign: "center" }}
+              >
+                Enter your monthly income and requested amount to see if you are
+                eligible and preview the repayment schedule.
+              </p>
             </div>
 
-            {error && typeof error === "object" && error.text && (
-              <motion.div
-                className="col-12"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
+            {/* Inputs and summary */}
+            <div className="row g-4">
+              {/* Left: form */}
+              <div className="col-lg-7">
                 <div
-                  className="alert d-flex align-items-center gap-2"
-                  style={{
-                    background: "rgba(239,68,68,0.1)",
-                    border: "1px solid rgba(239,68,68,0.3)",
-                    borderRadius: 12,
-                    color: "#ef4444",
-                    fontWeight: 600,
-                  }}
+                  className="mb-3 fw-semibold"
+                  style={{ fontSize: 14, color: "#9093a8" }}
                 >
-                  <i className="bi bi-exclamation-triangle-fill" style={{ fontSize: 20 }}></i>
-                  <span>{error.text}</span>
+                  Loan Details
                 </div>
-              </motion.div>
-            )}
 
-            {eligibility && (
-              <motion.div
-                className="col-12 mt-3"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <div
-                  className="card border-0 p-4"
-                  style={{
-                    borderRadius: 16,
-                    background: eligibility.eligible
-                      ? "linear-gradient(135deg, rgba(16,185,129,0.05) 0%, rgba(16,185,129,0.02) 100%)"
-                      : "linear-gradient(135deg, rgba(239,68,68,0.05) 0%, rgba(239,68,68,0.02) 100%)",
-                    border: eligibility.eligible
-                      ? "2px solid rgba(16,185,129,0.2)"
-                      : "2px solid rgba(239,68,68,0.2)",
-                  }}
-                >
-                  <div className="d-flex align-items-center mb-3">
-                    <div
+                <div className="mb-3">
+                  <label
+                    className="form-label mb-2"
+                    style={{ fontSize: 13, fontWeight: 600, color: "#555" }}
+                  >
+                    Monthly Income
+                  </label>
+                  <div className="input-group input-group-lg">
+                    <span
+                      className="input-group-text border-0"
                       style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: 12,
-                        background: eligibility.eligible
-                          ? "linear-gradient(135deg, #10b981 0%, #059669 100%)"
-                          : "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "#fff",
-                        fontSize: 24,
-                        boxShadow: eligibility.eligible
-                          ? "0 6px 16px rgba(16,185,129,0.3)"
-                          : "0 6px 16px rgba(239,68,68,0.3)",
+                        borderRadius: "16px 0 0 16px",
+                        background: "#f4f5fb",
+                        fontSize: 14,
+                        color: "#777",
                       }}
                     >
-                      <i
-                        className={`bi ${
-                          eligibility.eligible
-                            ? "bi-check-circle-fill"
-                            : "bi-x-circle-fill"
-                        }`}
-                      ></i>
-                    </div>
-                    <div className="ms-3">
-                      <h5 className="fw-bold mb-1">
-                        Status: {eligibility.eligible ? "✅ Eligible" : "❌ Not Eligible"}
-                      </h5>
-                      <p className="text-muted mb-0" style={{ fontSize: "0.9rem" }}>
-                        Probability: {(eligibility.probability * 100).toFixed(2)}%
-                      </p>
-                    </div>
+                      ₹
+                    </span>
+                    <input
+                      type="number"
+                      className="form-control border-0"
+                      style={{
+                        borderRadius: "0 16px 16px 0",
+                        background: "#f4f5fb",
+                        fontSize: 14,
+                        padding: "10px 14px",
+                      }}
+                      value={income}
+                      onChange={(e) => setIncome(e.target.value)}
+                      placeholder="e.g. 50,000"
+                    />
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <label
+                    className="form-label mb-2"
+                    style={{ fontSize: 13, fontWeight: 600, color: "#555" }}
+                  >
+                    Requested Loan Amount
+                  </label>
+                  <div className="input-group input-group-lg">
+                    <span
+                      className="input-group-text border-0"
+                      style={{
+                        borderRadius: "16px 0 0 16px",
+                        background: "#f4f5fb",
+                        fontSize: 14,
+                        color: "#777",
+                      }}
+                    >
+                      ₹
+                    </span>
+                    <input
+                      type="number"
+                      className="form-control border-0"
+                      style={{
+                        borderRadius: "0 16px 16px 0",
+                        background: "#f4f5fb",
+                        fontSize: 14,
+                        padding: "10px 14px",
+                      }}
+                      value={requestedAmount}
+                      onChange={(e) => setRequestedAmount(e.target.value)}
+                      placeholder="e.g. 1,00,000"
+                    />
+                  </div>
+                  <div
+                    className="text-muted mt-1"
+                    style={{ fontSize: 11 }}
+                  >
+                    Max allowed: 2× your monthly income.
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="d-flex gap-2 mt-3">
+                  <motion.button
+                    whileHover={{ scale: 0.99 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="btn btn-danger flex-grow-1"
+                    style={{
+                      borderRadius: 16,
+                      fontSize: 14,
+                      fontWeight: 600,
+                      background:
+                        "linear-gradient(180deg, #ff6b81 0%, #ff4757 100%)",
+                      border: "none",
+                    }}
+                    disabled={loading}
+                    onClick={handleCheckEligibility}
+                  >
+                    {loading ? "Checking..." : "Check Eligibility"}
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 0.99 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="btn btn-outline-secondary"
+                    style={{
+                      borderRadius: 16,
+                      fontSize: 13,
+                      paddingInline: 18,
+                    }}
+                    onClick={() => {
+                      setIncome("");
+                      setRequestedAmount("");
+                      setEligibility(null);
+                      setError("");
+                      setCreditScore(null);
+                      setInterestRate(null);
+                      setTotalDue(null);
+                      setMonthlyEMI(null);
+                    }}
+                  >
+                    Clear
+                  </motion.button>
+                </div>
+
+                {/* Error */}
+                <AnimatePresence>
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      className="mt-3"
+                    >
+                      <div
+                        className="w-100"
+                        style={{
+                          background: "#ffe9ea",
+                          borderRadius: 14,
+                          padding: "10px 14px",
+                          fontSize: 12,
+                          color: "#c0392b",
+                        }}
+                      >
+                        {error}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Right: summary card (similar to “Account Summary”) */}
+              <div className="col-lg-5">
+                <div
+                  className="shadow-sm h-100"
+                  style={{
+                    borderRadius: 24,
+                    background: "#ffffff",
+                    border: "1px solid #f1f2f7",
+                    padding: "18px 18px 20px",
+                  }}
+                >
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <span
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: "#444",
+                      }}
+                    >
+                      Eligibility Summary
+                    </span>
+                    {eligibility && (
+                      <span
+                        className="px-2 py-1"
+                        style={{
+                          fontSize: 11,
+                          borderRadius: 999,
+                          background: eligibility.eligible
+                            ? "#e9f9f1"
+                            : "#ffe9ea",
+                          color: eligibility.eligible ? "#1e9e5b" : "#d63031",
+                          fontWeight: 600,
+                        }}
+                      >
+                        {eligibility.eligible ? "Approved" : "Rejected"}
+                      </span>
+                    )}
                   </div>
 
-                  {eligibility.eligible && (
-                    <>
-                      {creditScore && (
-                        <div className="mt-3 text-center">
-                          <h6 className="fw-semibold mb-2">
-                            <i className="bi bi-bar-chart-fill text-info me-2"></i>
-                            Credit Score: <span className="text-dark">{creditScore}</span>
-                          </h6>
-                          <p className="text-muted small mb-1">
-                            Interest Rate: <strong>{interestRate}% p.a.</strong>
-                          </p>
-                          <p className="text-muted small mb-1">
-                            Total Due: <strong>₹{totalDue}</strong>
-                          </p>
-                          <p className="text-muted small">
-                            Monthly EMI (6 months): <strong>₹{monthlyEMI}</strong>
-                          </p>
-                        </div>
-                      )}
+                  {!eligibility && (
+                    <div
+                      className="mt-3"
+                      style={{ fontSize: 12, color: "#8b8fa4" }}
+                    >
+                      Run a check to see if this loan request can be approved
+                      based on your income and credit score.
+                    </div>
+                  )}
 
-                      <motion.button
-                        onClick={handleApplyLoan}
-                        className="btn btn-success w-100 mt-3"
-                        disabled={loading}
-                        style={{
-                          fontWeight: 600,
-                          borderRadius: 12,
-                          padding: "14px",
-                          fontSize: "1rem",
-                        }}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        {loading ? (
-                          <>
-                            <span className="spinner-border spinner-border-sm me-2"></span>
-                            Processing...
-                          </>
-                        ) : (
-                          <>
-                            <i className="bi bi-send-fill me-2"></i>
-                            Apply for Loan
-                          </>
-                        )}
-                      </motion.button>
+                  {eligibility && (
+                    <>
+                      <hr className="mt-3 mb-3" />
+
+                      <div className="mb-3">
+                        <div
+                          style={{
+                            fontSize: 12,
+                            color: "#9397b3",
+                            marginBottom: 4,
+                          }}
+                        >
+                          Status
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 16,
+                            fontWeight: 600,
+                            color: eligibility.eligible ? "#1e9e5b" : "#e74c3c",
+                          }}
+                        >
+                          {eligibility.eligible ? "You are eligible" : "Not eligible"}
+                        </div>
+                      </div>
+
+                      {eligibility.eligible && (
+                        <>
+                          <div className="d-flex justify-content-between mb-2">
+                            <div>
+                              <div
+                                style={{
+                                  fontSize: 11,
+                                  color: "#9a9fb5",
+                                }}
+                              >
+                                Credit Score
+                              </div>
+                              <div
+                                style={{
+                                  fontSize: 14,
+                                  fontWeight: 600,
+                                  color: "#333",
+                                }}
+                              >
+                                {creditScore ?? "--"}
+                              </div>
+                            </div>
+                            <div className="text-end">
+                              <div
+                                style={{
+                                  fontSize: 11,
+                                  color: "#9a9fb5",
+                                }}
+                              >
+                                Interest Rate
+                              </div>
+                              <div
+                                style={{
+                                  fontSize: 14,
+                                  fontWeight: 600,
+                                  color: "#333",
+                                }}
+                              >
+                                {interestRate != null ? `${interestRate}%` : "--"}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div
+                            className="p-3 mb-2"
+                            style={{
+                              borderRadius: 16,
+                              background: "#f8fafc",
+                            }}
+                          >
+                            <div className="d-flex justify-content-between mb-1">
+                              <span
+                                style={{
+                                  fontSize: 11,
+                                  color: "#9a9fb5",
+                                }}
+                              >
+                                Total Due
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: 14,
+                                  fontWeight: 600,
+                                  color: "#2f3542",
+                                }}
+                              >
+                                {totalDue ? `₹${totalDue}` : "--"}
+                              </span>
+                            </div>
+                            <div className="d-flex justify-content-between">
+                              <span
+                                style={{
+                                  fontSize: 11,
+                                  color: "#9a9fb5",
+                                }}
+                              >
+                                Monthly EMI (6 months)
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: 14,
+                                  fontWeight: 600,
+                                  color: "#ff4757",
+                                }}
+                              >
+                                {monthlyEMI ? `₹${monthlyEMI}` : "--"}
+                              </span>
+                            </div>
+                          </div>
+
+                          <motion.button
+                            whileHover={{ scale: 0.99 }}
+                            whileTap={{ scale: 0.97 }}
+                            className="btn btn-danger w-100 mt-2"
+                            style={{
+                              borderRadius: 16,
+                              fontSize: 14,
+                              fontWeight: 600,
+                              background:
+                                "linear-gradient(180deg,#ff6b81 0%,#ff4757 100%)",
+                              border: "none",
+                            }}
+                            disabled={loading}
+                            onClick={handleApplyLoan}
+                          >
+                            {loading ? "Submitting..." : "Apply for Loan"}
+                          </motion.button>
+                        </>
+                      )}
                     </>
                   )}
                 </div>
-              </motion.div>
-            )}
+              </div>
+            </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
 
+      {/* Success overlay */}
       <AnimatePresence>
         {showSuccess && (
           <motion.div
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "100vw",
-              height: "100vh",
-              background: "rgba(0,0,0,0.7)",
-              backdropFilter: "blur(4px)",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              zIndex: 3000,
-            }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+            style={{
+              background: "rgba(15,23,42,0.12)",
+              backdropFilter: "blur(4px)",
+              zIndex: 1050,
+            }}
           >
             <motion.div
+              initial={{ scale: 0.9, y: 10 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 10 }}
+              className="shadow-sm"
               style={{
-                background: "#fff",
-                padding: "2.5rem 3rem",
+                background: "#ffffff",
                 borderRadius: 24,
-                boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
-                textAlign: "center",
-                position: "relative",
-                overflow: "hidden",
-                maxWidth: 450,
-                border: "3px solid rgba(16,185,129,0.2)",
+                padding: "20px 22px 22px",
+                minWidth: 320,
+                maxWidth: 380,
               }}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
-              <div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: 4,
-                
-                }}
-              />
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.1 }}
-                style={{
-                  width: 80,
-                  height: 80,
-                  margin: "0 auto 1.5rem",
-                  borderRadius: "50%",
-                  background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#fff",
-                  fontSize: 40,
-                  boxShadow: "0 12px 30px rgba(16,185,129,0.4)",
-                }}
-              >
-                <i className="bi bi-check-circle-fill"></i>
-              </motion.div>
+              <div className="d-flex align-items-center mb-2">
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 999,
+                    background: "#eafaf2",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 10,
+                  }}
+                >
+                  <i
+                    className="bi bi-check-lg"
+                    style={{ color: "#1e9e5b", fontSize: 20 }}
+                  />
+                </div>
+                <div>
+                  <div
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: "#222",
+                    }}
+                  >
+                    Loan Application Submitted
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: "#8b8fa4",
+                    }}
+                  >
+                    Your request is being processed.
+                  </div>
+                </div>
+              </div>
 
-              <h4 className="fw-bold mb-2" style={{ color: "#1a1a1a", fontSize: "1.5rem" }}>
-                Loan Application Submitted!
-              </h4>
-              <p className="text-muted mb-0" style={{ fontSize: "0.95rem" }}>
-                Your application is being processed and reviewed by our team.
-              </p>
+              <button
+                className="btn btn-sm btn-danger w-100 mt-2"
+                style={{
+                  borderRadius: 12,
+                  fontSize: 13,
+                  background:
+                    "linear-gradient(180deg,#ff6b81 0%,#ff4757 100%)",
+                  border: "none",
+                }}
+                onClick={() => setShowSuccess(false)}
+              >
+                Close
+              </button>
             </motion.div>
           </motion.div>
         )}
