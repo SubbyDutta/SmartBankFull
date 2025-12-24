@@ -62,9 +62,13 @@ SmartBank is a production-style digital banking application designed to demonstr
   - Early/on-time payments improve score  
 -snippets:
 <img width="1910" height="400" width="600" alt="image" src="https://github.com/user-attachments/assets/af3cff04-2db4-4cc7-870d-b4588a5e85e5" />
+
 <img width="1917" height="400" width="600" alt="image" src="https://github.com/user-attachments/assets/8081ed84-da49-4fdd-8a9f-4578aadbee83" />
+
 <img width="1904" height="400" width="600" alt="image" src="https://github.com/user-attachments/assets/bc3a1702-b143-4195-8c88-f4ed05c4e6bf" />
+
 <img width="1912" height="400" width="600" alt="image" src="https://github.com/user-attachments/assets/b7b95883-62fc-447a-8bf4-bb0cfaf3ef81" />
+
 <img width="1910" height="400" width="600" alt="image" src="https://github.com/user-attachments/assets/2aefcc1b-d217-4029-ad94-64a8c7a15d9b" />
 
 ### Admin
@@ -74,10 +78,13 @@ SmartBank is a production-style digital banking application designed to demonstr
 - Block suspicious accounts
 - Oversee fraud detection results
 -snippets:
-  <img width="1914" height="895" alt="image" src="https://github.com/user-attachments/assets/8ab94777-774c-4394-8027-b8dd142e8b9a" />
-  <img width="1898" height="888" alt="image" src="https://github.com/user-attachments/assets/cd79bbce-35dd-4d2d-8d26-24c11f299835" />
-  <img width="1906" height="900" alt="image" src="https://github.com/user-attachments/assets/f9e48039-9f6a-4b1e-be02-d0efc16b583a" />
-  <img width="1913" height="907" alt="image" src="https://github.com/user-attachments/assets/552376b6-8556-4c80-8132-4ceab7bca7b2" />
+  <img width="1914" height="400" alt="image" src="https://github.com/user-attachments/assets/8ab94777-774c-4394-8027-b8dd142e8b9a" />
+  
+  <img width="1898" height="400" alt="image" src="https://github.com/user-attachments/assets/cd79bbce-35dd-4d2d-8d26-24c11f299835" />
+  
+ <img width="1913" height="891" alt="image" src="https://github.com/user-attachments/assets/0480523d-0750-47fc-8c82-0323acec8565" />
+
+  <img width="1913" height="400" alt="image" src="https://github.com/user-attachments/assets/552376b6-8556-4c80-8132-4ceab7bca7b2" />
 
 ## Machine Learning Integration
 
