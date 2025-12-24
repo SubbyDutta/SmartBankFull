@@ -78,20 +78,22 @@ SmartBank is a production-style digital banking application designed to demonstr
 - Block suspicious accounts
 - Oversee fraud detection results
 -snippets:
+ <img width="1913" height="891" alt="image" src="https://github.com/user-attachments/assets/0480523d-0750-47fc-8c82-0323acec8565" />
+
+  <img width="1913" height="400" alt="image" src="https://github.com/user-attachments/assets/552376b6-8556-4c80-8132-4ceab7bca7b2" />
+  
   <img width="1914" height="400" alt="image" src="https://github.com/user-attachments/assets/8ab94777-774c-4394-8027-b8dd142e8b9a" />
   
   <img width="1898" height="400" alt="image" src="https://github.com/user-attachments/assets/cd79bbce-35dd-4d2d-8d26-24c11f299835" />
   
- <img width="1913" height="891" alt="image" src="https://github.com/user-attachments/assets/0480523d-0750-47fc-8c82-0323acec8565" />
 
-  <img width="1913" height="400" alt="image" src="https://github.com/user-attachments/assets/552376b6-8556-4c80-8132-4ceab7bca7b2" />
 
 ## Machine Learning Integration
 
 - **Loan Eligibility Service**
-  - Predicts loan approval based on financial features
+  - Predicts loan approval based on **creditScore ,account Balance,monhtly income** .
 - **Transaction Fraud Detection Service**
-  - Flags suspicious transactions before completion
+  - Flags suspicious transactions before completion based on **transactions time,type,amount,avergate transaction amount,current balance etc factors**
 
 Both ML services are built in Python, deployed independently, and consumed by the Spring Boot backend via REST APIs.
 
