@@ -2,8 +2,8 @@
 
 🔗 Live Demo: https://smartbank-i2kx.onrender.com/
 
-SmartBank is a production-style digital banking application designed to demonstrate real-world backend engineering concepts used in fintech systems, including  Ai chatbot ,transactional safety, 
-idempotency, caching, pagination, secure authentication, and ML-driven decision services.
+SmartBank is a production-style digital banking application designed to demonstrate real-world backend engineering concepts used in fintech systems, including  **Ai chatbot** ,**ML-driven decision services** 
+ , **Redis caching** , **secure JWT authentication**, transactional safety, idempotency, pagination .
 
 ---
 
@@ -61,11 +61,11 @@ idempotency, caching, pagination, secure authentication, and ML-driven decision 
   - Late payments reduce score  
   - Early/on-time payments improve score  
 -snippets:
-<img width="1910" height="400" alt="image" src="https://github.com/user-attachments/assets/af3cff04-2db4-4cc7-870d-b4588a5e85e5" />
-<img width="1917" height="400" alt="image" src="https://github.com/user-attachments/assets/8081ed84-da49-4fdd-8a9f-4578aadbee83" />
-<img width="1904" height="400" alt="image" src="https://github.com/user-attachments/assets/bc3a1702-b143-4195-8c88-f4ed05c4e6bf" />
-<img width="1912" height="400" alt="image" src="https://github.com/user-attachments/assets/b7b95883-62fc-447a-8bf4-bb0cfaf3ef81" />
-<img width="1910" height="400" alt="image" src="https://github.com/user-attachments/assets/2aefcc1b-d217-4029-ad94-64a8c7a15d9b" />
+<img width="1910" height="400" width="600" alt="image" src="https://github.com/user-attachments/assets/af3cff04-2db4-4cc7-870d-b4588a5e85e5" />
+<img width="1917" height="400" width="600" alt="image" src="https://github.com/user-attachments/assets/8081ed84-da49-4fdd-8a9f-4578aadbee83" />
+<img width="1904" height="400" width="600" alt="image" src="https://github.com/user-attachments/assets/bc3a1702-b143-4195-8c88-f4ed05c4e6bf" />
+<img width="1912" height="400" width="600" alt="image" src="https://github.com/user-attachments/assets/b7b95883-62fc-447a-8bf4-bb0cfaf3ef81" />
+<img width="1910" height="400" width="600" alt="image" src="https://github.com/user-attachments/assets/2aefcc1b-d217-4029-ad94-64a8c7a15d9b" />
 
 ### Admin
 - Monitor all transactions
